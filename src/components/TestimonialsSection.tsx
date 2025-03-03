@@ -89,7 +89,7 @@ const TestimonialsSection = ({
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
-          <p className="text-zinc-400 max-w-2xl mx-auto">{subtitle}</p>
+          <p className="text-white max-w-2xl mx-auto">{subtitle}</p>
         </div>
 
         <Carousel
@@ -113,20 +113,20 @@ const TestimonialsSection = ({
                         />
                       </div>
                       <div>
-                        <h3 className="font-medium text-lg">
+                        <h3 className="font-medium text-white text-lg">
                           {testimonial.name}
                         </h3>
                         <div className="flex items-center">
                           {renderRating(testimonial.rating)}
-                          <span className="ml-2 text-sm text-zinc-400">
+                          <span className="ml-2 text-sm text-white">
                             {testimonial.rating.toFixed(1)}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <p className="text-zinc-300 mb-4">"{testimonial.text}"</p>
+                    <p className="text-white mb-4">"{testimonial.text}"</p>
                     <div className="mt-auto">
-                      <span className="inline-block px-3 py-1 bg-zinc-700 rounded-full text-xs">
+                      <span className="inline-block px-3 py-1 text-white  bg-red-800 rounded-full text-xs">
                         Estilo: {testimonial.tattooType}
                       </span>
                     </div>

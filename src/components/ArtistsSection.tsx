@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import ArtistCard from "./ArtistCard";
 import { Button } from "./ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -20,6 +19,50 @@ interface ArtistsSectionProps {
   artists?: Artist[];
 }
 
+// Implementação atualizada do ArtistCard
+const ArtistCard = ({
+  name,
+  photo,
+  specialties,
+  experience,
+  sampleWorks,
+  bio,
+}: Omit<Artist, "id">) => {
+  return (
+    <div className="bg-zinc-900 rounded-xl overflow-hidden shadow-xl w-full sm:max-w-[280px] md:max-w-[320px] lg:max-w-[350px] flex flex-col">
+      {/* Imagem do artista com altura responsiva */}
+      <div className="full  sm:h-80 md:h-96 overflow-hidden">
+        <img 
+          src={photo} 
+          alt={`Artista ${name}`} 
+          className="w-full h-full object-cover object-center" 
+        />
+      </div>
+      <div className="p-4 sm:p-6 flex-1">
+        <h3 className="text-lg sm:text-xl font-bold mb-2">{name}</h3>
+        <p className="text-zinc-400 text-xs sm:text-sm mb-2 sm:mb-3">Experiência: {experience}</p>
+        <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
+          {specialties.map((specialty, index) => (
+            <span
+              key={index}
+              className="bg-zinc-800 text-xs text-zinc-300 px-2 py-1 rounded-full"
+            >
+              {specialty}
+            </span>
+          ))}
+        </div>
+        <p className="text-zinc-400 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{bio}</p>
+        <Button 
+          variant="outline" 
+          className="w-full border-red-600 bg-red-600 text-white hover:bg-red-700 hover:border-red-700 transition-colors"
+        >
+          Ver perfil
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const ArtistsSection = ({
   title = "Nossos Artistas",
   subtitle = "Conheça os talentosos profissionais que transformarão suas ideias em arte na pele",
@@ -28,25 +71,28 @@ const ArtistsSection = ({
       id: "1",
       name: "Maria Silva",
       photo:
-        "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1000&auto=format&fit=crop",
+        "/public/tatto/Maria Silva-artista.jpg",
       specialties: ["Realismo", "Blackwork", "Aquarela"],
       experience: "8 anos",
       sampleWorks: [
-        "https://images.unsplash.com/photo-1590246814883-57764a28a6c6?q=80&w=300&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1561120589-7d6730102dc0?q=80&w=300&auto=format&fit=crop",
-      ],
+        "/gallery/gallery1.jpg",
+        
+        "/gallery/gallery1.jpg",
+          ],
       bio: "Especialista em transformar ideias em arte única na pele. Formada pela Escola de Artes Visuais, com passagens por estúdios renomados em São Paulo e Nova York.",
     },
     {
       id: "2",
       name: "Carlos Mendes",
       photo:
-        "https://images.unsplash.com/photo-1531891570158-e71b35a485bc?q=80&w=1000&auto=format&fit=crop",
+        "/tatto/Carlos Mendes-artista.jpg",
       specialties: ["Old School", "Tribal", "Geométrico"],
       experience: "12 anos",
       sampleWorks: [
-        "https://images.unsplash.com/photo-1598971861713-54ad16a7e72e?q=80&w=300&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1594067598377-478c61d59f3f?q=80&w=300&auto=format&fit=crop",
+        "/gallery/gallery1.jpg",
+        
+        "/gallery/gallery1.jpg",
+        
       ],
       bio: "Mestre em estilos tradicionais e contemporâneos. Participou de convenções internacionais e possui certificações em técnicas avançadas de sombreamento.",
     },
@@ -54,12 +100,14 @@ const ArtistsSection = ({
       id: "3",
       name: "Ana Oliveira",
       photo:
-        "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?q=80&w=1000&auto=format&fit=crop",
+        "/tatto/Ana Oliveira-artista.jpg",
       specialties: ["Minimalista", "Fineline", "Pontilhismo"],
       experience: "5 anos",
       sampleWorks: [
-        "https://images.unsplash.com/photo-1581342878583-5f71d2dac3d7?q=80&w=300&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?q=80&w=300&auto=format&fit=crop",
+        "/gallery/gallery1.jpg",
+        
+        "/gallery/gallery1.jpg",
+        
       ],
       bio: "Especializada em traços finos e designs minimalistas. Formada em Artes Plásticas com foco em técnicas de ilustração contemporânea.",
     },
@@ -67,19 +115,47 @@ const ArtistsSection = ({
       id: "4",
       name: "Rafael Costa",
       photo:
-        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1000&auto=format&fit=crop",
+        "/tatto/Rafael Costa-artista.jpeg",
       specialties: ["Oriental", "Colorido", "Cover-up"],
       experience: "10 anos",
       sampleWorks: [
-        "https://images.unsplash.com/photo-1598971861713-54ad16a7e72e?q=80&w=300&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1550537687-c91072c4792d?q=80&w=300&auto=format&fit=crop",
-      ],
+        "/gallery/gallery1.jpg",
+        
+        "/gallery/gallery1.jpg",
+          ],
       bio: "Especialista em arte oriental e coberturas complexas. Estudou técnicas tradicionais no Japão e trabalhou em estúdios renomados na Ásia e Europa.",
     },
   ],
 }: ArtistsSectionProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const cardsToShow = 3;
+  const [cardsToShow, setCardsToShow] = useState(1);
+  const [isMobile, setIsMobile] = useState(true);
+  
+  // Ajustar número de cartões baseado no tamanho da tela
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      
+      if (mobile) {
+        setCardsToShow(1);
+      } else if (window.innerWidth < 1024) {
+        setCardsToShow(2);
+      } else {
+        setCardsToShow(3);
+      }
+    };
+    
+    // Inicializar com base no tamanho de tela atual
+    handleResize();
+    
+    // Adicionar event listener para redimensionamento
+    window.addEventListener('resize', handleResize);
+    
+    // Limpar event listener quando o componente for desmontado
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   const maxIndex = Math.max(0, artists.length - cardsToShow);
 
   const handlePrevious = () => {
@@ -90,17 +166,25 @@ const ArtistsSection = ({
     setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
   };
 
-  const visibleArtists = artists.slice(
-    currentIndex,
-    currentIndex + cardsToShow,
-  );
+  // Calcular largura e gap com base no tamanho da tela
+  const getCardWidth = () => {
+    if (isMobile) return window.innerWidth - 32; // Largura total menos padding
+    if (window.innerWidth < 1024) return 320;
+    return 350;
+  };
+
+  const getCardGap = () => {
+    if (isMobile) return 0;
+    if (window.innerWidth < 1024) return 24;
+    return 32;
+  };
 
   return (
-    <section className="py-20 px-4 md:px-8 lg:px-16 bg-zinc-950 text-white">
+    <section className="py-12 sm:py-16 md:py-20 px-4 md:px-8 lg:px-16 bg-zinc-950 text-white">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <motion.h2
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -109,7 +193,7 @@ const ArtistsSection = ({
             {title}
           </motion.h2>
           <motion.p
-            className="text-zinc-400 max-w-2xl mx-auto"
+            className="text-zinc-400 text-sm sm:text-base max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -121,67 +205,89 @@ const ArtistsSection = ({
 
         <div className="relative">
           {/* Navigation buttons */}
-          <div className="absolute top-1/2 -left-4 md:-left-8 transform -translate-y-1/2 z-10">
+          <div className="absolute top-1/2 -left-2 sm:-left-4 md:-left-8 transform -translate-y-1/2 z-10">
             <Button
               variant="ghost"
               size="icon"
-              className="h-12 w-12 rounded-full bg-zinc-800/50 text-white hover:bg-zinc-700"
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-zinc-800/50 text-white hover:bg-zinc-700"
               onClick={handlePrevious}
               disabled={currentIndex === 0}
             >
-              <ChevronLeft className="h-6 w-6" />
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
           </div>
 
-          <div className="absolute top-1/2 -right-4 md:-right-8 transform -translate-y-1/2 z-10">
+          <div className="absolute top-1/2 -right-2 sm:-right-4 md:-right-8 transform -translate-y-1/2 z-10">
             <Button
               variant="ghost"
               size="icon"
-              className="h-12 w-12 rounded-full bg-zinc-800/50 text-white hover:bg-zinc-700"
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-zinc-800/50 text-white hover:bg-zinc-700"
               onClick={handleNext}
               disabled={currentIndex >= maxIndex}
             >
-              <ChevronRight className="h-6 w-6" />
+              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
           </div>
 
-          {/* Artists cards */}
+          {/* Artists cards - adaptado para dispositivos móveis */}
           <div className="overflow-hidden">
-            <motion.div
-              className="flex justify-center md:justify-start gap-6 md:gap-8"
-              initial={{ x: 0 }}
-              animate={{ x: `-${currentIndex * (350 + 32)}px` }} // 350px card width + 32px gap
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            >
-              {artists.map((artist) => (
-                <motion.div
-                  key={artist.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -10 }}
-                >
-                  <ArtistCard
-                    name={artist.name}
-                    photo={artist.photo}
-                    specialties={artist.specialties}
-                    experience={artist.experience}
-                    sampleWorks={artist.sampleWorks}
-                    bio={artist.bio}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
+            {isMobile ? (
+              // Layout para dispositivos móveis (1 cartão por vez, centralizado)
+              <div className="flex justify-center items-center">
+                {artists.map((artist, index) => (
+                  <div 
+                    key={artist.id} 
+                    className={`w-full ${index === currentIndex ? 'block' : 'hidden'}`}
+                  >
+                    <ArtistCard
+                      name={artist.name}
+                      photo={artist.photo}
+                      specialties={artist.specialties}
+                      experience={artist.experience}
+                      sampleWorks={artist.sampleWorks}
+                      bio={artist.bio}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <motion.div
+                className="flex justify-start gap-6 md:gap-8"
+                initial={{ x: 0 }}
+                animate={{ x: `-${currentIndex * (getCardWidth() + getCardGap())}px` }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                {artists.map((artist) => (
+                  <motion.div
+                    key={artist.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    viewport={{ once: true }}
+                    whileHover={{ y: -10 }}
+                    className="h-full" // Garantir que o container tenha altura completa
+                  >
+                    <ArtistCard
+                      name={artist.name}
+                      photo={artist.photo}
+                      specialties={artist.specialties}
+                      experience={artist.experience}
+                      sampleWorks={artist.sampleWorks}
+                      bio={artist.bio}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
           </div>
         </div>
 
-        {/* Mobile view indicator dots */}
-        <div className="flex justify-center mt-8 md:hidden">
-          {Array.from({ length: maxIndex + 1 }).map((_, index) => (
+        {/* Indicadores de página (dots) */}
+        <div className="flex justify-center mt-6 sm:mt-8">
+          {Array.from({ length: artists.length - (isMobile ? 0 : cardsToShow - 1) }).map((_, index) => (
             <button
               key={index}
-              className={`h-2 w-2 mx-1 rounded-full ${currentIndex === index ? "bg-white" : "bg-zinc-700"}`}
+              className={`h-2 w-2 mx-1 rounded-full ${currentIndex === index ? "bg-red-600" : "bg-zinc-700"}`}
               onClick={() => setCurrentIndex(index)}
               aria-label={`Go to artist group ${index + 1}`}
             />

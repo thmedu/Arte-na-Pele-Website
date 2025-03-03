@@ -1,22 +1,13 @@
 import React, { useEffect, useRef } from "react";
-import { Button } from "../components/ui/button";
 import { motion, useAnimation, useInView } from "framer-motion";
-
-interface HeroSectionProps {
-  title?: string;
-  tagline?: string;
-  backgroundImage?: string;
-  ctaText?: string;
-  onCtaClick?: () => void;
-}
 
 const HeroSection = ({
   title = "Arte na Pele",
   tagline = "Transformando ideias em arte única na sua pele",
-  backgroundImage = "https://images.unsplash.com/photo-1607461194891-3f736169b515?q=80&w=2070&auto=format&fit=crop",
+  backgroundImage = "/hero/hero3.jpg", 
   ctaText = "Agende sua consulta",
   onCtaClick = () => console.log("CTA clicked"),
-}: HeroSectionProps) => {
+}) => {
   const controls = useAnimation();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true });
@@ -27,115 +18,92 @@ const HeroSection = ({
     }
   }, [controls, inView]);
 
-  const bannerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.8 } },
-  };
-
-  const titleVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.2 } },
-  };
-
-  const taglineVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.4 } },
-  };
-
-  const buttonVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.6 } },
-    hover: { scale: 1.05, transition: { duration: 0.3 } },
-  };
-
   return (
-    <section
-      ref={ref}
-      className="relative w-full h-[700px] bg-zinc-900 overflow-hidden"
-    >
-      {/* Background Image with Overlay */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        initial="hidden"
-        animate={controls}
-        variants={bannerVariants}
+    <section ref={ref} className="relative w-full h-screen bg-black overflow-hidden">
+      {/* Background with parallax effect */}
+      <motion.div 
+        className="absolute inset-0"
+        initial={{ scale: 1.2 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
       >
-        <div className="absolute inset-0 bg-black/50 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
         <img
           src={backgroundImage}
-          alt="Tattoo art background"
+          alt="Background"
           className="w-full h-full object-cover"
         />
       </motion.div>
 
-      {/* Banner overlay */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/70 via-transparent to-transparent" />
+      {/* Animated grain texture */}
+      <div className="absolute inset-0 opacity-50 mix-blend-overlay">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc1IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iLjA1Ii8+PC9zdmc+')] animate-grain" />
+      </div>
 
-      {/* Content Container */}
-      <div className="relative z-20 h-full w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-start">
-        <div className="max-w-2xl">
+      {/* Content */}
+      <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+        <div className="max-w-3xl">
           <motion.div
-            initial="hidden"
-            animate={controls}
-            variants={titleVariants}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
           >
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500 mb-6">
               {title}
             </h1>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            animate={controls}
-            variants={taglineVariants}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="text-xl md:text-2xl text-gray-300 mb-8"
           >
-            <p className="text-xl md:text-2xl text-zinc-200 mb-8">{tagline}</p>
-          </motion.div>
+            {tagline}
+          </motion.p>
 
-          <motion.div
-            initial="hidden"
-            animate={controls}
-            variants={buttonVariants}
-            whileHover="hover"
+          <motion.button
+            onClick={onCtaClick}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white text-black px-8 py-4 text-lg font-medium rounded-full 
+                     hover:bg-opacity-90 transition-all duration-300
+                     shadow-[0_0_20px_rgba(255,255,255,0.3)]
+                     hover:shadow-[0_0_30px_rgba(255,255,255,0.5)]"
           >
-            <Button
-              onClick={onCtaClick}
-              size="lg"
-              className="bg-red-600 hover:bg-red-700 text-white font-medium text-lg px-8 py-6 h-auto rounded-md transition-all duration-300 shadow-lg hover:shadow-red-600/20"
-            >
-              {ctaText}
-            </Button>
-          </motion.div>
+            {ctaText}
+          </motion.button>
         </div>
       </div>
 
-      {/* Decorative Elements */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-zinc-900 to-transparent z-10" />
-
-      {/* Animated Floating design elements */}
+      {/* Animated decorative elements */}
       <motion.div
-        className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-red-500/10 blur-3xl"
+        className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-b from-purple-500/20 to-transparent blur-3xl"
         animate={{
-          y: [0, -20, 0],
-          opacity: [0.5, 0.8, 0.5],
-        }}
-        transition={{
-          duration: 6,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-      <motion.div
-        className="absolute bottom-1/3 left-1/3 w-96 h-96 rounded-full bg-purple-500/10 blur-3xl"
-        animate={{
-          y: [0, 20, 0],
-          opacity: [0.5, 0.8, 0.5],
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3],
         }}
         transition={{
           duration: 8,
           repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1,
+          repeatType: "reverse",
+        }}
+      />
+      
+      <motion.div
+        className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-t from-red-500/20 to-transparent blur-3xl"
+        animate={{
+          scale: [1.2, 1, 1.2],
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          repeatType: "reverse",
+          delay: 4,
         }}
       />
     </section>

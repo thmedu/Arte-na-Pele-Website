@@ -1,57 +1,52 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { CalendarIcon, Send, Clock, MapPin } from "lucide-react";
+import React, { useState } from 'react';
+import { CalendarIcon, Send, Clock, MapPin } from 'lucide-react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "./ui/form";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
-import { Checkbox } from "./ui/checkbox";
-
+// Form Schema with more robust validation
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
-  email: z.string().email({ message: "Email inválido" }),
-  phone: z.string().min(10, { message: "Telefone inválido" }),
-  serviceType: z.string({
-    required_error: "Selecione um tipo de serviço",
+  name: z.string().trim().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
+  email: z.string().trim().email({ message: "Email inválido" }),
+  phone: z.string()
+    .trim()
+    .regex(/^\(\d{2}\)\s*\d{4,5}-\d{4}$/, { message: "Telefone inválido. Use (00) 00000-0000" }),
+  serviceType: z.enum([
+    'consultation', 
+    'small', 
+    'medium', 
+    'large', 
+    'coverup', 
+    'custom'
+  ], { 
+    errorMap: () => ({ message: "Selecione um tipo de serviço" }) 
   }),
   preferredDate: z.string().optional(),
   preferredTime: z.string().optional(),
-  acceptTerms: z.boolean().refine((val) => val === true, {
-    message: "Você precisa aceitar os termos para continuar",
-  }),
-  message: z.string().optional(),
+  message: z.string().max(500, { message: "Mensagem muito longa" }).optional(),
+  acceptTerms: z.boolean().refine(val => val, {
+    message: "Você precisa aceitar os termos para continuar"
+  })
 });
 
-interface AppointmentSectionProps {
-  title?: string;
-  subtitle?: string;
-  backgroundImage?: string;
-}
+// Centralized service type options
+const SERVICE_TYPES = [
+  { value: 'consultation', label: 'Consulta Inicial' },
+  { value: 'small', label: 'Tatuagem Pequena' },
+  { value: 'medium', label: 'Tatuagem Média' },
+  { value: 'large', label: 'Tatuagem Grande' },
+  { value: 'coverup', label: 'Cobertura' },
+  { value: 'custom', label: 'Projeto Personalizado' }
+];
 
 const AppointmentSection = ({
   title = "Agende sua Consulta",
   subtitle = "Dê o primeiro passo para transformar sua ideia em arte. Nossa equipe entrará em contato em até 24 horas.",
-  backgroundImage = "https://images.unsplash.com/photo-1585681614545-cd8c7b9d92b3?q=80&w=2070&auto=format&fit=crop",
-}: AppointmentSectionProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  backgroundImage = "/hero/hero.jpg"
+}) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -60,271 +55,206 @@ const AppointmentSection = ({
       serviceType: "",
       preferredDate: "",
       preferredTime: "",
-      acceptTerms: false,
       message: "",
-    },
+      acceptTerms: false
+    }
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real implementation, this would send the form data to a server
-    console.log(values);
-    alert("Formulário enviado com sucesso! Entraremos em contato em breve.");
-    form.reset();
-  }
+  const onSubmit = async (values) => {
+    setIsSubmitting(true);
+    try {
+      // Simulated async submission
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log(values);
+      form.reset();
+      alert("Formulário enviado com sucesso! Entraremos em contato em breve.");
+    } catch (error) {
+      alert("Erro ao enviar formulário. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Reusable feature item component
+  const FeatureItem = ({ icon: Icon, title, description }) => (
+    <div className="flex items-center gap-5 mb-6 group">
+      <div className="w-14 h-14 rounded-xl bg-red-900/30 backdrop-blur-sm flex items-center justify-center transition-all duration-300 group-hover:bg-red-800/50 border border-red-800/30 shadow-lg">
+        <Icon className="w-7 h-7 text-red-400 group-hover:text-white transition-colors" />
+      </div>
+      <div>
+        <h3 className="font-semibold text-lg">{title}</h3>
+        <p className="text-zinc-300 text-sm">{description}</p>
+      </div>
+    </div>
+  );
+
+  const FormInput = ({ id, label, type = "text", error, ...props }) => (
+    <div className="space-y-1">
+      <label htmlFor={id} className="block text-sm font-medium text-zinc-300">
+        {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        className={`w-full bg-zinc-800/70 border ${error ? 'border-red-500' : 'border-zinc-700'} rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all`}
+        {...props}
+      />
+      {error && (
+        <p className="text-red-500 text-xs mt-1">{error.message}</p>
+      )}
+    </div>
+  );
 
   return (
-    <section className="relative w-full h-[500px] bg-zinc-900 text-white overflow-hidden">
-      {/* Background Image with Overlay */}
+    <section className="relative w-full min-h-[700px] bg-zinc-900 text-white overflow-hidden py-16">
+      {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-black/70 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 to-black/70 z-10" />
         <img
           src={backgroundImage}
           alt="Tattoo studio background"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center"
+          loading="lazy"
         />
       </div>
 
       {/* Content Container */}
-      <div className="relative z-20 container mx-auto px-4 py-12 h-full flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="relative z-20 container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
         {/* Text Content */}
-        <div className="md:w-1/2 text-center md:text-left">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
-          <p className="text-zinc-300 mb-6 max-w-md">{subtitle}</p>
-          <div className="hidden md:block space-y-4">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center">
-                <CalendarIcon className="w-6 h-6 text-red-500" />
-              </div>
-              <div>
-                <h3 className="font-medium">Horário Flexível</h3>
-                <p className="text-sm text-zinc-400">
-                  Atendemos de segunda a sábado, das 10h às 20h
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-red-500" />
-              </div>
-              <div>
-                <h3 className="font-medium">Consulta Gratuita</h3>
-                <p className="text-sm text-zinc-400">
-                  Primeira consulta sem compromisso para discutir seu projeto
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center">
-                <MapPin className="w-6 h-6 text-red-500" />
-              </div>
-              <div>
-                <h3 className="font-medium">Localização Central</h3>
-                <p className="text-sm text-zinc-400">
-                  Estúdio localizado no centro da cidade, fácil acesso
-                </p>
-              </div>
-            </div>
+        <div className="text-center md:text-left">
+          <div className="inline-block px-4 py-1 bg-red-900/30 backdrop-blur-sm rounded-full text-red-400 text-sm font-medium mb-6 border border-red-800/30">
+            Estúdio de Arte Corporal
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">{title}</h2>
+          <p className="text-zinc-300 mb-10 max-w-md text-lg">{subtitle}</p>
+          <div className="hidden md:block space-y-2">
+            <FeatureItem 
+              icon={CalendarIcon}
+              title="Horário Flexível"
+              description="Atendemos de segunda a sábado, das 10h às 20h"
+            />
+            <FeatureItem 
+              icon={Clock}
+              title="Consulta Gratuita"
+              description="Primeira consulta sem compromisso para discutir seu projeto"
+            />
+            <FeatureItem 
+              icon={MapPin}
+              title="Localização Central"
+              description="Estúdio localizado no centro da cidade, fácil acesso"
+            />
           </div>
         </div>
 
         {/* Form */}
-        <div className="w-full md:w-1/2 max-w-md bg-zinc-900/90 p-6 rounded-lg border border-zinc-800">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Nome</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Seu nome completo"
-                        {...field}
-                        className="bg-zinc-800 border-zinc-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+        <div className="w-full bg-zinc-900/80 backdrop-blur-md p-8 rounded-2xl border border-zinc-800/50 shadow-xl">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <FormInput 
+              id="name"
+              label="Nome Completo" 
+              placeholder="Seu nome"
+              {...form.register("name")}
+              error={form.formState.errors.name}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <FormInput 
+                id="email"
+                label="Email" 
+                type="email"
+                placeholder="seu@email.com"
+                {...form.register("email")}
+                error={form.formState.errors.email}
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="seu@email.com"
-                          {...field}
-                          className="bg-zinc-800 border-zinc-700"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">Telefone</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="(00) 00000-0000"
-                          {...field}
-                          className="bg-zinc-800 border-zinc-700"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="serviceType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">
-                      Tipo de Serviço
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="bg-zinc-800 border-zinc-700">
-                          <SelectValue placeholder="Selecione o tipo de tatuagem" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                        <SelectItem value="consultation">
-                          Consulta Inicial
-                        </SelectItem>
-                        <SelectItem value="small">Tatuagem Pequena</SelectItem>
-                        <SelectItem value="medium">Tatuagem Média</SelectItem>
-                        <SelectItem value="large">Tatuagem Grande</SelectItem>
-                        <SelectItem value="coverup">Cobertura</SelectItem>
-                        <SelectItem value="custom">
-                          Projeto Personalizado
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              
+              <FormInput 
+                id="phone"
+                label="Telefone" 
+                placeholder="(00) 00000-0000"
+                {...form.register("phone")}
+                error={form.formState.errors.phone}
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="preferredDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">
-                        Data Preferida
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="date"
-                          placeholder="Escolha uma data"
-                          {...field}
-                          className="bg-zinc-800 border-zinc-700"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="preferredTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">
-                        Horário Preferido
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="bg-zinc-800 border-zinc-700">
-                            <SelectValue placeholder="Selecione um horário" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                          <SelectItem value="morning">
-                            Manhã (10h-12h)
-                          </SelectItem>
-                          <SelectItem value="afternoon">
-                            Tarde (13h-17h)
-                          </SelectItem>
-                          <SelectItem value="evening">
-                            Noite (18h-20h)
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">
-                      Mensagem (opcional)
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Descreva sua ideia de tatuagem ou qualquer detalhe importante..."
-                        className="bg-zinc-800 border-zinc-700 min-h-[80px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="acceptTerms"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4 bg-zinc-800/50">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="text-white">
-                        Aceito os termos e condições do estúdio
-                      </FormLabel>
-                      <FormDescription className="text-zinc-400 text-xs">
-                        Ao agendar, você concorda com nossa política de
-                        cancelamento e termos de serviço.
-                      </FormDescription>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                className="w-full bg-red-600 hover:bg-red-700 text-white"
+            </div>
+            
+            <div className="space-y-1">
+              <label htmlFor="serviceType" className="block text-sm font-medium text-zinc-300">
+                Tipo de Serviço
+              </label>
+              <select
+                id="serviceType"
+                className={`w-full bg-zinc-800/70 border ${form.formState.errors.serviceType ? 'border-red-500' : 'border-zinc-700'} rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all`}
+                {...form.register("serviceType")}
               >
-                <Send className="mr-2 h-4 w-4" /> Agendar Consulta
-              </Button>
-            </form>
-          </Form>
+                <option value="">Selecione o tipo de serviço</option>
+                {SERVICE_TYPES.map(type => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+              {form.formState.errors.serviceType && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.serviceType.message}</p>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <FormInput 
+                id="preferredDate"
+                label="Data Preferida" 
+                type="date"
+                {...form.register("preferredDate")}
+                error={form.formState.errors.preferredDate}
+              />
+              
+              <FormInput 
+                id="preferredTime"
+                label="Horário Preferido" 
+                type="time"
+                {...form.register("preferredTime")}
+                error={form.formState.errors.preferredTime}
+              />
+            </div>
+            
+            <div className="space-y-1">
+              <label htmlFor="message" className="block text-sm font-medium text-zinc-300">
+                Detalhes da Tatuagem (opcional)
+              </label>
+              <textarea
+                id="message"
+                rows={3}
+                className={`w-full bg-zinc-800/70 border ${form.formState.errors.message ? 'border-red-500' : 'border-zinc-700'} rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all resize-none`}
+                placeholder="Descreva sua ideia, tamanho, localização no corpo, e referências"
+                {...form.register("message")}
+              />
+              {form.formState.errors.message && (
+                <p className="text-red-500 text-xs mt-1">{form.formState.errors.message.message}</p>
+              )}
+            </div>
+            
+            <div className="flex items-start gap-3">
+              <input
+                id="acceptTerms"
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-red-600 focus:ring-red-500/50"
+                {...form.register("acceptTerms")}
+              />
+              <label htmlFor="acceptTerms" className="text-sm text-zinc-300">
+                Concordo com os <a href="#" className="text-red-400 hover:text-red-300 underline">termos e condições</a> e política de privacidade
+              </label>
+            </div>
+            {form.formState.errors.acceptTerms && (
+              <p className="text-red-500 text-xs mt-1">{form.formState.errors.acceptTerms.message}</p>
+            )}
+            
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 px-6 rounded-lg flex items-center justify-center font-medium text-base shadow-lg hover:shadow-red-600/20 transition-all duration-300 disabled:opacity-70"
+            >
+              {isSubmitting ? 'Enviando...' : 'Agendar Consulta'}
+              {!isSubmitting && <Send className="ml-2 h-5 w-5" />}
+            </button>
+          </form>
         </div>
       </div>
     </section>

@@ -82,7 +82,7 @@ const PricingSection = ({
             {title}
           </motion.h2>
           <motion.p
-            className="text-zinc-400 max-w-2xl mx-auto"
+            className="text-white max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -113,9 +113,9 @@ const PricingSection = ({
                 <CardHeader className="pb-0">
                   <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                   <div className="mt-2">
-                    <span className="text-3xl font-bold">{plan.price}</span>
+                    <span className="text-3xl text-red-600 font-bold">{plan.price}</span>
                   </div>
-                  <p className="text-zinc-400 mt-2">{plan.description}</p>
+                  <p className="text-white mt-2">{plan.description}</p>
                 </CardHeader>
                 <CardContent className="flex-grow">
                   <ul className="space-y-3 mt-4">

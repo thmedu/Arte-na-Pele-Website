@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "./ui/button";
-import { Menu, X, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, Phone } from "lucide-react";
+
+interface MenuItem {
+  label: string;
+  href: string;
+}
 
 interface HeaderProps {
   logo?: string;
-  menuItems?: Array<{ label: string; href: string }>;
+  menuItems?: MenuItem[];
   onAppointmentClick?: () => void;
 }
 
-const Header = ({
+const Header: React.FC<HeaderProps> = ({
   logo = "Arte na Pele",
   menuItems = [
     { label: "Início", href: "#" },
@@ -22,42 +26,47 @@ const Header = ({
     { label: "Contato", href: "#contact" },
   ],
   onAppointmentClick = () => console.log("Appointment button clicked"),
-}: HeaderProps) => {
+}) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
+      setScrolled(window.scrollY > 10);
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [scrolled]);
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const headerVariants = {
-    initial: { y: -100 },
-    animate: { y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    initial: { y: -100, opacity: 0 },
+    animate: { 
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        duration: 0.5, 
+        ease: "easeOut" 
+      } 
+    },
   };
 
   const mobileMenuVariants = {
-    hidden: { opacity: 0, height: 0 },
-    visible: { opacity: 1, height: "auto", transition: { duration: 0.3 } },
-    exit: { opacity: 0, height: 0, transition: { duration: 0.3 } },
-  };
-
-  const logoVariants = {
-    initial: { opacity: 0, x: -20 },
-    animate: { opacity: 1, x: 0, transition: { duration: 0.5, delay: 0.2 } },
+    hidden: { 
+      opacity: 0, 
+      height: 0,
+      transition: { duration: 0.3 }
+    },
+    visible: { 
+      opacity: 1, 
+      height: "auto",
+      transition: { duration: 0.3 } 
+    },
+    exit: { 
+      opacity: 0, 
+      height: 0,
+      transition: { duration: 0.3 } 
+    },
   };
 
   const navItemVariants = {
@@ -65,20 +74,52 @@ const Header = ({
     animate: (i: number) => ({
       opacity: 1,
       y: 0,
-      transition: { duration: 0.3, delay: 0.1 + i * 0.1 },
+      transition: { 
+        duration: 0.3, 
+        delay: 0.1 + i * 0.1 
+      },
     }),
   };
 
+  const AppointmentButton = ({ mobile = false }) => (
+    <button
+      onClick={onAppointmentClick}
+      className={`
+        flex items-center justify-center gap-2 
+        ${mobile 
+          ? 'w-full bg-red-600 hover:bg-red-700 text-white mt-2' 
+          : 'bg-white text-black px-8 py-4 text-lg font-medium rounded-full hover:bg-opacity-90'}
+        transition-all duration-300
+        shadow-[0_0_20px_rgba(255,255,255,0.3)]
+        hover:shadow-[0_0_30px_rgba(255,255,255,0.5)]
+      `}
+    >
+      <Phone className="h-4 w-4" />
+      Agendar
+    </button>
+  );
+
   return (
     <motion.header
-      className={`fixed top-0 left-0 right-0 h-20 text-white z-50 transition-all duration-300 ${scrolled ? "bg-zinc-900/95 backdrop-blur-sm shadow-lg" : "bg-zinc-900 shadow-md"}`}
+      className={`
+        fixed top-0 left-0 right-0 h-20 text-white z-50 
+        transition-all duration-300 
+        ${scrolled 
+          ? 'bg-zinc-900/95 backdrop-blur-sm shadow-lg' 
+          : 'bg-zinc-900 shadow-md'}
+      `}
       initial="initial"
       animate="animate"
       variants={headerVariants}
     >
       <div className="container mx-auto h-full px-4 flex items-center justify-between">
         {/* Logo */}
-        <motion.div className="flex items-center" variants={logoVariants}>
+        <motion.div 
+          className="flex items-center"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           <a href="#" className="text-2xl font-bold tracking-tight">
             {logo}
           </a>
@@ -88,7 +129,11 @@ const Header = ({
         <nav className="hidden md:flex items-center space-x-8">
           <ul className="flex space-x-6">
             {menuItems.map((item, index) => (
-              <motion.li key={index} custom={index} variants={navItemVariants}>
+              <motion.li 
+                key={index} 
+                custom={index} 
+                variants={navItemVariants}
+              >
                 <a
                   href={item.href}
                   className="text-zinc-300 hover:text-white transition-colors duration-200"
@@ -98,21 +143,18 @@ const Header = ({
               </motion.li>
             ))}
           </ul>
-          <motion.div variants={navItemVariants} custom={menuItems.length}>
-            <Button
-              onClick={onAppointmentClick}
-              className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
-            >
-              <Phone className="h-4 w-4" />
-              Agendar
-            </Button>
+          <motion.div 
+            variants={navItemVariants} 
+            custom={menuItems.length}
+          >
+            <AppointmentButton />
           </motion.div>
         </nav>
 
         {/* Mobile Menu Button */}
         <motion.button
           className="md:hidden text-white"
-          onClick={toggleMobileMenu}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
           variants={navItemVariants}
           custom={0}
@@ -158,16 +200,7 @@ const Header = ({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 * menuItems.length }}
                 >
-                  <Button
-                    onClick={() => {
-                      onAppointmentClick();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 mt-2"
-                  >
-                    <Phone className="h-4 w-4" />
-                    Agendar
-                  </Button>
+                  <AppointmentButton mobile />
                 </motion.li>
               </ul>
             </div>
